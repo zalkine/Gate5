@@ -55,22 +55,41 @@ function computeGR() {
   };
 }
 
-// ── Cell geometry (mild perspective) ──────────────────────────────────────
+// ── Cell geometry — proper perspective projection ─────────────────────────
+// PERSP = width of top row as fraction of bottom row (0.4 = strong perspective)
+const PERSP = 0.42;
+// Normalizer so row heights sum to GR.h
+const _NORM = (PERSP + 1) / 2;
+
+function _tScale(t)  { return PERSP + (1 - PERSP) * t; }
+// Cumulative height fraction up to parameter t (0..1 continuous)
+function _tY(t)      { return (PERSP * t + (1 - PERSP) * t * t / 2) / _NORM; }
+
 function cellRect(col, row) {
-  const t        = row / (ROWS - 1);           // 0=top, 1=bottom
-  const scale    = 0.82 + 0.18 * t;
-  const rowW     = GR.w * scale;
-  const rowX     = GR.x + (GR.w - rowW) / 2;
-  const cellW    = rowW / COLS;
-  const cellH    = GR.h / ROWS;
-  return { x: rowX + col * cellW, y: GR.y + row * cellH, w: cellW, h: cellH };
+  const t0 = row       / ROWS;
+  const t1 = (row + 1) / ROWS;
+  const y0 = GR.y + GR.h * _tY(t0);
+  const y1 = GR.y + GR.h * _tY(t1);
+  const tMid  = (t0 + t1) / 2;
+  const scale = _tScale(tMid);
+  const rowW  = GR.w * scale;
+  const rowX  = GR.x + (GR.w - rowW) / 2;
+  const cellW = rowW / COLS;
+  return { x: rowX + col * cellW, y: y0, w: cellW, h: y1 - y0 };
 }
 
 function pointToCell(px, py) {
-  const row = Math.floor((py - GR.y) / (GR.h / ROWS));
-  if (row < 0 || row >= ROWS) return null;
-  const t    = row / (ROWS - 1);
-  const scale = 0.82 + 0.18 * t;
+  const relY = (py - GR.y) / GR.h;
+  if (relY < 0 || relY > 1) return null;
+  // Invert _tY: solve PERSP*t + (1-PERSP)*t²/2 = relY*_NORM
+  // => (1-PERSP)/2 * t² + PERSP * t - relY*_NORM = 0
+  const a = (1 - PERSP) / 2, b = PERSP, c = -relY * _NORM;
+  const disc = b * b - 4 * a * c;
+  if (disc < 0) return null;
+  const t = (-b + Math.sqrt(disc)) / (2 * a);
+  if (t < 0 || t > 1) return null;
+  const row = Math.min(ROWS - 1, Math.floor(t * ROWS));
+  const scale = _tScale(t);
   const rowW  = GR.w * scale;
   const rowX  = GR.x + (GR.w - rowW) / 2;
   const col   = Math.floor((px - rowX) / (rowW / COLS));
@@ -235,9 +254,19 @@ function drawBleacher(x, y, w, h) {
 
 // ── Grid cells ─────────────────────────────────────────────────────────────
 function drawGrid() {
-  // Fill the entire grid rect with navy first, so perspective corners aren't black
+  // Fill the trapezoid area with navy so nothing outside cells is black
+  const tl = cellRect(0,        0);
+  const tr = cellRect(COLS - 1, 0);
+  const br = cellRect(COLS - 1, ROWS - 1);
+  const bl = cellRect(0,        ROWS - 1);
   ctx.fillStyle = '#253570';
-  ctx.fillRect(GR.x, GR.y, GR.w, GR.h);
+  ctx.beginPath();
+  ctx.moveTo(tl.x,           tl.y);
+  ctx.lineTo(tr.x + tr.w,    tr.y);
+  ctx.lineTo(br.x + br.w,    br.y + br.h);
+  ctx.lineTo(bl.x,            bl.y + bl.h);
+  ctx.closePath();
+  ctx.fill();
 
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {

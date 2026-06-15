@@ -10,7 +10,25 @@ let activeColor = '#CC0000';
 let isPainting  = false;
 let history     = [];
 let frame       = 0;
-let sideSeats   = null; // pre-computed random seat pattern
+let sideSeats     = null;
+let gridTextMask  = null; // יונצ'י pixel mask for main grid
+
+function buildGridTextMask() {
+  const ofc = document.createElement('canvas');
+  ofc.width = COLS; ofc.height = ROWS;
+  const oc = ofc.getContext('2d');
+  oc.fillStyle = '#000';
+  oc.fillRect(0, 0, COLS, ROWS);
+  oc.fillStyle = '#fff';
+  oc.font = `bold ${Math.round(ROWS * 0.58)}px Arial`;
+  oc.textAlign = 'center';
+  oc.textBaseline = 'middle';
+  oc.fillText("יונצ'י", COLS / 2, ROWS / 2);
+  const px = oc.getImageData(0, 0, COLS, ROWS).data;
+  gridTextMask = Array.from({ length: ROWS }, (_, r) =>
+    Array.from({ length: COLS }, (_, c) => px[(r * COLS + c) * 4] > 80)
+  );
+}
 
 function createGrid() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -279,9 +297,13 @@ function drawCell(col, row, cell) {
   const { x, y, w, h } = cellRect(col, row);
 
   if (!cell) {
-    // Empty seat – dark navy/blue like real Bloomfield seats
-    const navys = ['#253570','#1e2c62','#2a3a78','#22306a'];
-    ctx.fillStyle = navys[(row * 3 + col * 7) % navys.length];
+    // Check if this seat is part of the יונצ'י text mask
+    const isLetter = gridTextMask && gridTextMask[row] && gridTextMask[row][col];
+    // Letter seats: slightly brighter navy — subtle, same family
+    const palette = isLetter
+      ? ['#3a52a0','#384e98','#3c54a4','#364a96']   // brighter navy = letter
+      : ['#253570','#1e2c62','#2a3a78','#22306a'];   // darker navy  = background
+    ctx.fillStyle = palette[(row * 3 + col * 7) % palette.length];
     ctx.fillRect(x, y, w, h);
     // Seat top highlight
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
@@ -557,5 +579,6 @@ document.getElementById('btn-save').addEventListener('click', () => {
 window.addEventListener('resize', () => { resize(); computeGR(); });
 resize();
 buildSideSeats();
+buildGridTextMask();
 loop();
 

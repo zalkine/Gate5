@@ -98,9 +98,7 @@ function drawStadium() {
   ctx.fillStyle = '#ccc';
   ctx.fillRect(0, H * 0.255, W, H * 0.005);
 
-  // Dark block behind the fan grid
-  ctx.fillStyle = '#1a1a2a';
-  ctx.fillRect(GR.x - 2, GR.y - 2, GR.w + 4, GR.h + 4);
+  // No dark block — grid cells draw their own purple seats
 
   // Side bleachers with purple seats (Bloomfield colors)
   drawBleacher(0,            GR.y, GR.x,            GR.h);
@@ -238,16 +236,21 @@ function drawCell(col, row, cell) {
   const { x, y, w, h } = cellRect(col, row);
 
   if (!cell) {
-    // Empty seat – very dark
-    ctx.fillStyle = '#1c1c1c';
+    // Empty seat – purple like the rest of the stand
+    const purples = ['#4a3d8c','#3d3278','#50409a','#423688'];
+    ctx.fillStyle = purples[(row * 3 + col * 7) % purples.length];
     ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(x, y, w, h);
+    // Seat top highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.09)';
+    ctx.fillRect(x, y, w, h * 0.22);
+    // Seat bottom shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(x, y + h * 0.78, w, h * 0.22);
     return;
   }
 
-  ctx.fillStyle = '#1c1c1c';
+  // Background behind placed item
+  ctx.fillStyle = '#2a2040';
   ctx.fillRect(x, y, w, h);
 
   const { type, color } = cell;

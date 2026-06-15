@@ -28,11 +28,21 @@ let GR = {};  // grid rect in canvas pixels
 function resize() {
   const wrap = document.getElementById('scene-wrapper');
   const dpr  = devicePixelRatio || 1;
-  canvas.width  = wrap.clientWidth  * dpr;
-  canvas.height = wrap.clientHeight * dpr;
-  canvas.style.width  = wrap.clientWidth  + 'px';
-  canvas.style.height = wrap.clientHeight + 'px';
+  const maxW = wrap.clientWidth;
+  const maxH = wrap.clientHeight;
+
+  // Lock to landscape 16:9 so the stadium always looks like a panorama
+  const aspect = 16 / 9;
+  let w = maxW;
+  let h = Math.round(w / aspect);
+  if (h > maxH) { h = maxH; w = Math.round(h * aspect); }
+
+  canvas.width  = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = h + 'px';
   computeGR();
+  if (sideSeats) buildSideSeats();
 }
 
 function computeGR() {
@@ -204,8 +214,8 @@ function drawBleacher(x, y, w, h) {
   const cw = w / BCOLS, ch = h / BROWS;
 
   // Dark navy (background) vs slightly lighter navy (letter seats = יונצ'י)
-  const bgColors  = ['#1e2d5a','#18264e','#1a2854','#162248'];
-  const txtColors = ['#2e4480','#304878','#2a4070','#364e8a'];
+  const bgColors  = ['#253570','#1e2c62','#2a3a78','#22306a'];
+  const txtColors = ['#3a52a0','#3c5098','#4058a8','#3650a0'];
 
   for (let r = 0; r < BROWS; r++) {
     for (let c = 0; c < BCOLS; c++) {
@@ -237,7 +247,7 @@ function drawCell(col, row, cell) {
 
   if (!cell) {
     // Empty seat – dark navy/blue like real Bloomfield seats
-    const navys = ['#1e2d5a','#18264e','#223262','#1a2854'];
+    const navys = ['#253570','#1e2c62','#2a3a78','#22306a'];
     ctx.fillStyle = navys[(row * 3 + col * 7) % navys.length];
     ctx.fillRect(x, y, w, h);
     // Seat top highlight

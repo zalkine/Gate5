@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>שער 5 - בלומפילד</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="top-bar">
+      <span id="title">שער 5 — בלומפילד</span>
+      <button id="btn-clear">נקה הכל</button>
+      <button id="btn-save">שמור תמונה</button>
+    </header>
+
+    <div id="scene-wrapper">
+      <canvas id="scene"></canvas>
+    </div>
+
+    <div id="toolbar">
+      <div id="toolbar-scroll">
+        <button class="tool-btn" data-type="fan" title="אוהד">🧑</button>
+        <button class="tool-btn" data-type="flag" title="דגל">🚩</button>
+        <button class="tool-btn" data-type="torch" title="אבוקה">🔥</button>
+        <button class="tool-btn" data-type="smoke" title="רימון עשן">💨</button>
+        <button class="tool-btn" data-type="flaglet" title="דגלון">🏳️</button>
+        <button class="tool-btn" data-type="balloon" title="בלון">🎈</button>
+        <button class="tool-btn" data-type="placard" title="פלקט">📋</button>
+        <button class="tool-btn" data-type="fenceflag" title="דגל גדר">🏴</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="size-picker" class="hidden">
+    <span>גודל:</span>
+    <button class="size-opt" data-size="0.6">S</button>
+    <button class="size-opt" data-size="1.0">M</button>
+    <button class="size-opt" data-size="1.5">L</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

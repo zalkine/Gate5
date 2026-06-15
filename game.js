@@ -320,7 +320,32 @@ function drawCell(col, row, cell) {
 
   const { type, color } = cell;
 
-  if (type === 'card') {
+  if (type === 'fan') {
+    // Pants / legs
+    ctx.fillStyle = '#1a1a2a';
+    ctx.fillRect(x + w * 0.25, y + h * 0.68, w * 0.5, h * 0.32);
+    // Shirt (colored)
+    ctx.fillStyle = color;
+    ctx.fillRect(x + w * 0.18, y + h * 0.44, w * 0.64, h * 0.28);
+    // Arms out (same shirt color)
+    ctx.fillRect(x,            y + h * 0.46, w * 0.20, h * 0.14);
+    ctx.fillRect(x + w * 0.80, y + h * 0.46, w * 0.20, h * 0.14);
+    // Shirt shine
+    ctx.fillStyle = 'rgba(255,255,255,0.13)';
+    ctx.fillRect(x + w * 0.18, y + h * 0.44, w * 0.64, h * 0.07);
+    // Head (skin tone)
+    ctx.fillStyle = '#c8916a';
+    ctx.beginPath();
+    ctx.arc(x + w * 0.5, y + h * 0.36, w * 0.16, 0, Math.PI * 2);
+    ctx.fill();
+    // Hair (dark)
+    ctx.fillStyle = '#2a1a0a';
+    ctx.beginPath();
+    ctx.arc(x + w * 0.5, y + h * 0.30, w * 0.15, Math.PI, Math.PI * 2);
+    ctx.fill();
+  }
+
+  else if (type === 'card') {
     // Fan body
     ctx.fillStyle = '#2a2a2a';
     ctx.fillRect(x + w * 0.15, y + h * 0.52, w * 0.7, h * 0.48);

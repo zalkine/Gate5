@@ -3,42 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>שער 5 - בלומפילד</title>
+  <title>שער 5 — בנה טיפו</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <header id="top-bar">
-      <span id="title">שער 5 — בלומפילד</span>
-      <button id="btn-clear">נקה הכל</button>
-      <button id="btn-save">שמור תמונה</button>
-    </header>
+<div id="app">
 
-    <div id="scene-wrapper">
-      <canvas id="scene"></canvas>
+  <header id="top-bar">
+    <span id="title">שער 5 — בלומפילד</span>
+    <div id="top-actions">
+      <button id="btn-undo">↩</button>
+      <button id="btn-clear">נקה</button>
+      <button id="btn-save">💾</button>
     </div>
+  </header>
 
-    <div id="toolbar">
-      <div id="toolbar-scroll">
-        <button class="tool-btn" data-type="fan" title="אוהד">🧑</button>
-        <button class="tool-btn" data-type="flag" title="דגל">🚩</button>
-        <button class="tool-btn" data-type="torch" title="אבוקה">🔥</button>
-        <button class="tool-btn" data-type="smoke" title="רימון עשן">💨</button>
-        <button class="tool-btn" data-type="flaglet" title="דגלון">🏳️</button>
-        <button class="tool-btn" data-type="balloon" title="בלון">🎈</button>
-        <button class="tool-btn" data-type="placard" title="פלקט">📋</button>
-        <button class="tool-btn" data-type="fenceflag" title="דגל גדר">🏴</button>
-      </div>
+  <div id="scene-wrapper">
+    <canvas id="scene"></canvas>
+  </div>
+
+  <div id="toolbar">
+    <div id="color-row">
+      <button class="cswatch active" data-color="#CC0000" style="background:#CC0000" title="אדום"></button>
+      <button class="cswatch" data-color="#FFFFFF" style="background:#FFFFFF;border-color:#999" title="לבן"></button>
+      <button class="cswatch" data-color="#111111" style="background:#111111" title="שחור"></button>
+      <button class="cswatch" data-color="#FFD700" style="background:#FFD700" title="צהוב"></button>
+      <button class="cswatch" data-color="#003399" style="background:#003399" title="כחול"></button>
+      <button class="cswatch" data-color="#FF6600" style="background:#FF6600" title="כתום"></button>
+      <button class="cswatch" data-color="#006600" style="background:#006600" title="ירוק"></button>
+      <button class="cswatch" data-color="#8B0000" style="background:#8B0000" title="אדום כהה"></button>
+    </div>
+    <div id="tool-row">
+      <button class="tbtn active" data-tool="card" title="קלף">🃏</button>
+      <button class="tbtn" data-tool="flag" title="דגל">🚩</button>
+      <button class="tbtn" data-tool="torch" title="אבוקה">🔥</button>
+      <button class="tbtn" data-tool="smoke" title="עשן">💨</button>
+      <button class="tbtn" data-tool="balloon" title="בלון">🎈</button>
+      <button class="tbtn" data-tool="banner" title="פלקט">📜</button>
+      <button class="tbtn" data-tool="fill" title="מילוי">🪣</button>
+      <button class="tbtn" data-tool="erase" title="מחק">🧹</button>
     </div>
   </div>
 
-  <div id="size-picker" class="hidden">
-    <span>גודל:</span>
-    <button class="size-opt" data-size="0.6">S</button>
-    <button class="size-opt" data-size="1.0">M</button>
-    <button class="size-opt" data-size="1.5">L</button>
-  </div>
-
-  <script src="game.js"></script>
+</div>
+<script src="game.js"></script>
 </body>
 </html>

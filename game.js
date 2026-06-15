@@ -235,6 +235,10 @@ function drawBleacher(x, y, w, h) {
 
 // ── Grid cells ─────────────────────────────────────────────────────────────
 function drawGrid() {
+  // Fill the entire grid rect with navy first, so perspective corners aren't black
+  ctx.fillStyle = '#253570';
+  ctx.fillRect(GR.x, GR.y, GR.w, GR.h);
+
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       drawCell(col, row, grid[row][col]);

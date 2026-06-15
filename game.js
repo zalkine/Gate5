@@ -10,6 +10,7 @@ let activeColor = '#CC0000';
 let isPainting  = false;
 let history     = [];
 let frame       = 0;
+let sideSeats   = null; // pre-computed random seat pattern
 
 function createGrid() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -80,68 +81,123 @@ function loop() {
 function drawStadium() {
   const W = canvas.width, H = canvas.height;
 
-  // Sky
-  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.2);
-  sky.addColorStop(0, '#4fa8d5');
-  sky.addColorStop(1, '#87CEEB');
+  // Bright blue sky (like the photo)
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.22);
+  sky.addColorStop(0, '#2196c4');
+  sky.addColorStop(1, '#5DC8F0');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, W, H * 0.22);
 
-  // Roof structure
-  ctx.fillStyle = '#3a3a3a';
-  ctx.fillRect(0, H * 0.14, W, H * 0.065);
+  // White curved roof (the distinctive Bloomfield roof)
+  drawRoof(W, H);
 
-  // Roof girders
-  ctx.strokeStyle = '#555';
-  ctx.lineWidth = (W / 400) * 4;
-  for (let i = 0; i <= 10; i++) {
-    ctx.beginPath();
-    ctx.moveTo(W * i / 10, H * 0.14);
-    ctx.lineTo(W * i / 10, H * 0.21);
-    ctx.stroke();
-  }
-  // Roof edge highlight
-  ctx.fillStyle = '#666';
-  ctx.fillRect(0, H * 0.14, W, 3 * devicePixelRatio);
-  ctx.fillStyle = '#222';
-  ctx.fillRect(0, H * 0.20, W, H * 0.005);
+  // White concrete wall above the stands
+  ctx.fillStyle = '#e8e8e8';
+  ctx.fillRect(0, H * 0.20, W, H * 0.06);
+  // Wall shadow line
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(0, H * 0.255, W, H * 0.005);
 
   // Dark block behind the fan grid
-  ctx.fillStyle = '#151515';
+  ctx.fillStyle = '#1a1a2a';
   ctx.fillRect(GR.x - 2, GR.y - 2, GR.w + 4, GR.h + 4);
 
-  // Side bleachers
-  drawBleacher(0,           GR.y, GR.x,           GR.h);
+  // Side bleachers with purple seats (Bloomfield colors)
+  drawBleacher(0,            GR.y, GR.x,            GR.h);
   drawBleacher(GR.x + GR.w, GR.y, W - GR.x - GR.w, GR.h);
 
-  // Pitch strip at bottom
-  const pitchY = GR.y + GR.h;
+  // Concrete terrace floor strip
+  ctx.fillStyle = '#c8c8c8';
+  ctx.fillRect(0, GR.y + GR.h, W, H * 0.02);
+
+  // Pitch (bright green like the photo)
+  const pitchY = GR.y + GR.h + H * 0.02;
   const pitch = ctx.createLinearGradient(0, pitchY, 0, H);
-  pitch.addColorStop(0, '#2d6a1e');
-  pitch.addColorStop(1, '#1a4010');
+  pitch.addColorStop(0, '#3aaa2a');
+  pitch.addColorStop(0.4, '#2e9020');
+  pitch.addColorStop(1, '#1e6010');
   ctx.fillStyle = pitch;
   ctx.fillRect(0, pitchY, W, H - pitchY);
 
-  // Pitch lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-  ctx.lineWidth = devicePixelRatio;
+  // Pitch stripe pattern
+  const stripeW = W / 10;
+  for (let i = 0; i < 10; i += 2) {
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    ctx.fillRect(i * stripeW, pitchY, stripeW, H - pitchY);
+  }
+
+  // Goal (white posts)
+  drawGoal(W, H, pitchY);
+
+  // Pitch white lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = devicePixelRatio * 1.5;
+  // Goal area line
   ctx.beginPath();
-  ctx.moveTo(W * 0.5, pitchY);
-  ctx.lineTo(W * 0.5, H);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(W * 0.5, pitchY + (H - pitchY) * 0.55, (H - pitchY) * 0.35, 0, Math.PI * 2);
+  ctx.moveTo(W * 0.32, pitchY + H * 0.01);
+  ctx.lineTo(W * 0.68, pitchY + H * 0.01);
   ctx.stroke();
 }
 
+function drawRoof(W, H) {
+  // Curved white roof — convex arc like Bloomfield
+  ctx.save();
+  ctx.fillStyle = '#f0f0f0';
+  ctx.beginPath();
+  ctx.moveTo(-W * 0.05, H * 0.22);
+  ctx.quadraticCurveTo(W * 0.5, H * 0.00, W * 1.05, H * 0.22);
+  ctx.lineTo(W * 1.05, H * 0.20);
+  ctx.quadraticCurveTo(W * 0.5, H * 0.02, -W * 0.05, H * 0.20);
+  ctx.closePath();
+  ctx.fill();
+  // Roof underside shadow
+  ctx.fillStyle = '#d8d8d8';
+  ctx.beginPath();
+  ctx.moveTo(-W * 0.05, H * 0.20);
+  ctx.quadraticCurveTo(W * 0.5, H * 0.02, W * 1.05, H * 0.20);
+  ctx.lineTo(W * 1.05, H * 0.21);
+  ctx.quadraticCurveTo(W * 0.5, H * 0.035, -W * 0.05, H * 0.21);
+  ctx.closePath();
+  ctx.fill();
+  // Roof edge strip (dark underside)
+  ctx.fillStyle = '#aaa';
+  ctx.beginPath();
+  ctx.moveTo(-W * 0.05, H * 0.195);
+  ctx.quadraticCurveTo(W * 0.5, H * 0.015, W * 1.05, H * 0.195);
+  ctx.lineTo(W * 1.05, H * 0.200);
+  ctx.quadraticCurveTo(W * 0.5, H * 0.020, -W * 0.05, H * 0.200);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawGoal(W, H, pitchY) {
+  const gx = W * 0.38, gw = W * 0.24, gh = H * 0.04;
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = devicePixelRatio * 2.5;
+  ctx.strokeRect(gx, pitchY, gw, gh);
+}
+
+function buildSideSeats() {
+  const BROWS = 16, BCOLS = 24;
+  const palette = ['#5b4ea0','#4a3d8c','#6a5cb8','#3d3278','#7060c0'];
+  sideSeats = Array.from({ length: BROWS }, (_, r) =>
+    Array.from({ length: BCOLS }, (_, c) => {
+      const empty = Math.random() < 0.28;
+      return empty ? '#b0a8d8' : palette[(r * 3 + c * 7) % palette.length];
+    })
+  );
+}
+
 function drawBleacher(x, y, w, h) {
-  const BROWS = 14, BCOLS = Math.max(2, Math.floor(w / (GR.w / COLS / 1.2)));
+  if (w < 2) return;
+  if (!sideSeats) buildSideSeats();
+  const BROWS = 16, BCOLS = Math.max(2, Math.floor(w / (GR.w / COLS / 1.0)));
   const cw = w / BCOLS, ch = h / BROWS;
-  const palette = ['#CC6600','#DD7700','#BB5500','#EE8800'];
   for (let r = 0; r < BROWS; r++) {
     for (let c = 0; c < BCOLS; c++) {
-      ctx.fillStyle = palette[(r * 3 + c * 2) % palette.length];
-      ctx.fillRect(x + c * cw + 1, y + r * ch + 1, cw - 2, ch - 2);
+      ctx.fillStyle = sideSeats[r][c % sideSeats[0].length];
+      ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch - 1);
     }
   }
 }
@@ -431,4 +487,5 @@ document.getElementById('btn-save').addEventListener('click', () => {
 // ── Init ───────────────────────────────────────────────────────────────────
 window.addEventListener('resize', () => { resize(); computeGR(); });
 resize();
+buildSideSeats();
 loop();

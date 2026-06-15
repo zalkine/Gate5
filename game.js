@@ -38,9 +38,9 @@ function resize() {
 function computeGR() {
   const W = canvas.width, H = canvas.height;
   GR = {
-    x: W * 0.14,
+    x: W * 0.20,
     y: H * 0.20,
-    w: W * 0.72,
+    w: W * 0.60,
     h: H * 0.72,
   };
 }
@@ -179,54 +179,50 @@ function drawGoal(W, H, pitchY) {
 }
 
 function buildSideSeats() {
-  const BROWS = 22, BCOLS = 30;
-  const base    = ['#5b4ea0','#4a3d8c','#6a5cb8','#3d3278','#7060c0'];
-  const shadow  = ['#3a3070','#2e2660','#4a3e88'];
-  sideSeats = Array.from({ length: BROWS }, (_, r) =>
-    Array.from({ length: BCOLS }, (_, c) => {
-      const n = Math.random();
-      if (n < 0.18) return '#c8c0e8';        // empty / light seat
-      if (n < 0.28) return shadow[(r+c)%3];  // shadow variant
-      return base[(r * 3 + c * 7) % base.length];
-    })
+  const BROWS = 24;
+  // Use an off-screen canvas to rasterize "יונצ'י" into a seat-pixel mask
+  const BCOLS = 16;
+  const ofc = document.createElement('canvas');
+  ofc.width = BCOLS; ofc.height = BROWS;
+  const oc = ofc.getContext('2d');
+  oc.fillStyle = '#000';
+  oc.fillRect(0, 0, BCOLS, BROWS);
+  oc.fillStyle = '#fff';
+  oc.font = `bold ${Math.round(BROWS * 0.42)}px Arial`;
+  oc.textAlign = 'center';
+  oc.textBaseline = 'middle';
+  oc.fillText("יונצ'י", BCOLS / 2, BROWS / 2);
+  const px = oc.getImageData(0, 0, BCOLS, BROWS).data;
+  const mask = Array.from({ length: BROWS }, (_, r) =>
+    Array.from({ length: BCOLS }, (_, c) => px[(r * BCOLS + c) * 4] > 80)
   );
+  sideSeats = { BROWS, BCOLS, mask };
 }
 
 function drawBleacher(x, y, w, h) {
-  if (w < 2) return;
+  if (w < 3) return;
   if (!sideSeats) buildSideSeats();
-  const BROWS = 22;
-  const BCOLS = Math.max(3, Math.round(w / Math.max(1, h / BROWS) * 1.4));
+  const { BROWS, BCOLS, mask } = sideSeats;
   const cw = w / BCOLS, ch = h / BROWS;
+
+  // Dark purple (background seats) vs slightly lighter purple (letter seats)
+  const bgColors  = ['#4a3d8c','#3d3278','#423688','#3a2e78'];
+  const txtColors = ['#7a6ec0','#7268b8','#8070c8','#6a62b0'];
 
   for (let r = 0; r < BROWS; r++) {
     for (let c = 0; c < BCOLS; c++) {
-      const color = sideSeats[r][c % sideSeats[0].length];
-      // Seat body
-      ctx.fillStyle = color;
+      const isLetter = mask[r][c];
+      const palette  = isLetter ? txtColors : bgColors;
+      ctx.fillStyle  = palette[(r * 3 + c * 7) % palette.length];
       ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch - 1);
-      // Seat back highlight (top edge lighter)
-      ctx.fillStyle = 'rgba(255,255,255,0.12)';
-      ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch * 0.25);
-      // Row shadow (bottom edge)
-      ctx.fillStyle = 'rgba(0,0,0,0.25)';
-      ctx.fillRect(x + c * cw + 0.5, y + r * ch + ch * 0.78, cw - 1, ch * 0.22);
+      // Seat top highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch * 0.22);
+      // Seat bottom shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.20)';
+      ctx.fillRect(x + c * cw + 0.5, y + (r + 0.78) * ch, cw - 1, ch * 0.22);
     }
   }
-
-  // "יונצ'י" text stamped on the bleacher
-  ctx.save();
-  const fontSize = Math.max(10, h * 0.13);
-  ctx.font = `bold ${fontSize}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.55)';
-  ctx.fillText("יונצ'י", x + w / 2 + 1, y + h / 2 + 2);
-  // White text
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText("יונצ'י", x + w / 2, y + h / 2);
-  ctx.restore();
 }
 
 // ── Grid cells ─────────────────────────────────────────────────────────────
@@ -516,3 +512,4 @@ window.addEventListener('resize', () => { resize(); computeGR(); });
 resize();
 buildSideSeats();
 loop();
+

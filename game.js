@@ -203,9 +203,9 @@ function drawBleacher(x, y, w, h) {
   const { BROWS, BCOLS, mask } = sideSeats;
   const cw = w / BCOLS, ch = h / BROWS;
 
-  // Dark purple (background seats) vs slightly lighter purple (letter seats)
-  const bgColors  = ['#4a3d8c','#3d3278','#423688','#3a2e78'];
-  const txtColors = ['#7a6ec0','#7268b8','#8070c8','#6a62b0'];
+  // Dark navy (background) vs slightly lighter navy (letter seats = יונצ'י)
+  const bgColors  = ['#1e2d5a','#18264e','#1a2854','#162248'];
+  const txtColors = ['#2e4480','#304878','#2a4070','#364e8a'];
 
   for (let r = 0; r < BROWS; r++) {
     for (let c = 0; c < BCOLS; c++) {
@@ -236,15 +236,15 @@ function drawCell(col, row, cell) {
   const { x, y, w, h } = cellRect(col, row);
 
   if (!cell) {
-    // Empty seat – purple like the rest of the stand
-    const purples = ['#4a3d8c','#3d3278','#50409a','#423688'];
-    ctx.fillStyle = purples[(row * 3 + col * 7) % purples.length];
+    // Empty seat – dark navy/blue like real Bloomfield seats
+    const navys = ['#1e2d5a','#18264e','#223262','#1a2854'];
+    ctx.fillStyle = navys[(row * 3 + col * 7) % navys.length];
     ctx.fillRect(x, y, w, h);
     // Seat top highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.09)';
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.fillRect(x, y, w, h * 0.22);
     // Seat bottom shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(x, y + h * 0.78, w, h * 0.22);
     return;
   }

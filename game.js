@@ -1,7 +1,7 @@
 'use strict';
 
-const COLS = 32;
-const ROWS = 20;
+const COLS = 46;
+const ROWS = 26;
 
 // ── State ──────────────────────────────────────────────────────────────────
 let grid        = createGrid();
@@ -38,9 +38,9 @@ function resize() {
 function computeGR() {
   const W = canvas.width, H = canvas.height;
   GR = {
-    x: W * 0.07,
+    x: W * 0.14,
     y: H * 0.20,
-    w: W * 0.86,
+    w: W * 0.72,
     h: H * 0.72,
   };
 }
@@ -179,12 +179,15 @@ function drawGoal(W, H, pitchY) {
 }
 
 function buildSideSeats() {
-  const BROWS = 16, BCOLS = 24;
-  const palette = ['#5b4ea0','#4a3d8c','#6a5cb8','#3d3278','#7060c0'];
+  const BROWS = 22, BCOLS = 30;
+  const base    = ['#5b4ea0','#4a3d8c','#6a5cb8','#3d3278','#7060c0'];
+  const shadow  = ['#3a3070','#2e2660','#4a3e88'];
   sideSeats = Array.from({ length: BROWS }, (_, r) =>
     Array.from({ length: BCOLS }, (_, c) => {
-      const empty = Math.random() < 0.28;
-      return empty ? '#b0a8d8' : palette[(r * 3 + c * 7) % palette.length];
+      const n = Math.random();
+      if (n < 0.18) return '#c8c0e8';        // empty / light seat
+      if (n < 0.28) return shadow[(r+c)%3];  // shadow variant
+      return base[(r * 3 + c * 7) % base.length];
     })
   );
 }
@@ -192,14 +195,38 @@ function buildSideSeats() {
 function drawBleacher(x, y, w, h) {
   if (w < 2) return;
   if (!sideSeats) buildSideSeats();
-  const BROWS = 16, BCOLS = Math.max(2, Math.floor(w / (GR.w / COLS / 1.0)));
+  const BROWS = 22;
+  const BCOLS = Math.max(3, Math.round(w / Math.max(1, h / BROWS) * 1.4));
   const cw = w / BCOLS, ch = h / BROWS;
+
   for (let r = 0; r < BROWS; r++) {
     for (let c = 0; c < BCOLS; c++) {
-      ctx.fillStyle = sideSeats[r][c % sideSeats[0].length];
+      const color = sideSeats[r][c % sideSeats[0].length];
+      // Seat body
+      ctx.fillStyle = color;
       ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch - 1);
+      // Seat back highlight (top edge lighter)
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch * 0.25);
+      // Row shadow (bottom edge)
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.fillRect(x + c * cw + 0.5, y + r * ch + ch * 0.78, cw - 1, ch * 0.22);
     }
   }
+
+  // "יונצ'י" text stamped on the bleacher
+  ctx.save();
+  const fontSize = Math.max(10, h * 0.13);
+  ctx.font = `bold ${fontSize}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillText("יונצ'י", x + w / 2 + 1, y + h / 2 + 2);
+  // White text
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText("יונצ'י", x + w / 2, y + h / 2);
+  ctx.restore();
 }
 
 // ── Grid cells ─────────────────────────────────────────────────────────────
